@@ -90,7 +90,6 @@ def main(args):
             except ValueError as e:
                 print(e)
 
-
     for value in values():
         vs = common.ValueSet(
             id=value["ID"],
