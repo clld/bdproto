@@ -39,6 +39,12 @@ def main(args):
         / "cldf"
         / "StructureDataset-metadata.json"
     )
+
+    if not cldf_dataset_path.exists():
+        print(f"{cldf_dataset_path} does not exist.\n"
+              f"Please clone the cldf dataset into {cldf_dataset_path.parent.parent}")
+        return
+
     cldf_dataset = StructureDataset.from_metadata(cldf_dataset_path)
 
     for lang in cldf_dataset["LanguageTable"]:
