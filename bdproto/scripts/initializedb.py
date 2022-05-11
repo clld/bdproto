@@ -61,6 +61,7 @@ def main(args):
         data.add(
             models.Inventory, contrib["ID"],
             pk=contrib["ID"],
+            id=contrib["ID"],
             name=":".join([contrib["Glottocode"], contrib["ID"]]),
             language_pk=contrib["Glottocode"],
             inventory_type=contrib["InventoryType"],
