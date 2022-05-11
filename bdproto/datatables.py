@@ -20,7 +20,11 @@ class LanguageCol(LinkCol):
 
 class Inventories(datatables.contribution.Contributions):
     def base_query(self, query):
-        q = query.join(common.Language).distinct().options(joinedload(models.Inventory.language))
+        q = (
+            query.join(common.Language)
+            .distinct()
+            .options(joinedload(models.Inventory.language))
+        )
         return q
 
     def col_defs(self):
@@ -77,18 +81,14 @@ class Varieties(datatables.language.Languages):
 class Phonemes(datatables.value.Values):
     def col_defs(self):
         return [
-            LinkCol(self, "language", get_obj=lambda i: i.valueset.language),
-            LinkCol(self, "contribution", get_obj=lambda i: i.valueset.contribution),
-            Col(self, "name"),
+            LinkCol(self, "parameter", get_obj=lambda i: i.valueset.parameter),
+            Col(
+                self,
+                "description",
+                get_obj=lambda i: i.valueset.parameter,
+                model_col=common.Parameter.description,
+            ),
         ]
-
-    # def base_query(self, query):
-    #     print(query)
-    #     q = query.options(
-    #         joinedload(common.Value.language),
-    #         joinedload(common.Value.contribution),
-    #     )
-    #     return q
 
 
 def includeme(config):
