@@ -16,4 +16,4 @@
 ${(map_ or request.map).render()}
 % endif
 
-${request.get_datatable('values', h.models.Value, parameter=ctx).render()}
+${request.get_datatable('segments', h.models.Value, parameter=ctx).render()}

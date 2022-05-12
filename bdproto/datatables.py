@@ -91,8 +91,41 @@ class Phonemes(datatables.value.Values):
         ]
 
 
+class SegmentDetails(datatables.value.Values):
+    def col_defs(self):
+        return [
+            Col(
+                self,
+                "contribution",
+                get_obj=lambda i: i.valueset.contribution,
+                model_col=common.Contribution.name,
+            ),
+            LinkCol(
+                self,
+                "language",
+                model_col=common.Language.name,
+                get_obj=lambda i: i.valueset.language,
+            ),
+        ]
+
+    def base_query(self, query):
+        query = (
+            query
+            .join(common.ValueSet.contribution)
+            .options(
+                joinedload(common.Value.valueset).joinedload(common.Valueset.language),
+                joinedload(common.Value.valueset).joinedload(
+                    common.Valueset.contribution
+                ),
+            )
+        )
+        print(query)
+        return query
+
+
 def includeme(config):
     """register custom datatables"""
     config.register_datatable("contributions", Inventories)
     config.register_datatable("languages", Varieties)
     config.register_datatable("values", Phonemes)
+    config.register_datatable("segments", SegmentDetails)
