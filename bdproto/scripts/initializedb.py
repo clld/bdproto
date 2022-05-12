@@ -1,5 +1,4 @@
-import itertools
-import collections
+import logging
 
 from pathlib import Path
 
@@ -41,8 +40,10 @@ def main(args):
     )
 
     if not cldf_dataset_path.exists():
-        print(f"{cldf_dataset_path} does not exist.\n"
-              f"Please clone the cldf dataset into {cldf_dataset_path.parent.parent}")
+        print(
+            f"{cldf_dataset_path} does not exist.\n"
+            f"Please clone the cldf dataset into {cldf_dataset_path.parent.parent}"
+        )
         return
 
     cldf_dataset = StructureDataset.from_metadata(cldf_dataset_path)
@@ -51,7 +52,8 @@ def main(args):
         if not lang["ID"]:
             continue
         data.add(
-            models.Variety, lang["ID"],
+            models.Variety,
+            lang["ID"],
             id=lang["ID"],
             name=lang["Name"],
             macroarea=lang["Macroarea"],
@@ -65,7 +67,8 @@ def main(args):
 
     for contrib in cldf_dataset["ContributionTable"]:
         data.add(
-            models.Inventory, contrib["ID"],
+            models.Inventory,
+            contrib["ID"],
             pk=contrib["ID"],
             id=contrib["ID"],
             name=":".join([contrib["Glottocode"], contrib["ID"]]),
@@ -78,26 +81,16 @@ def main(args):
 
     for parameter in cldf_dataset["ParameterTable"]:
         data.add(
-            common.Parameter, parameter["ID"],
+            common.Parameter,
+            parameter["ID"],
             id=parameter["ID"],
             name=parameter["Name"],
             description=parameter["Description"],
         )
 
-    # Try to handle exceptions when iterating over invalid value.csv
-    # The current solution doesn't seem to work
-    value_iterator = iter(cldf_dataset["ValueTable"])
+    value_iterator = cldf_dataset["ValueTable"].iterdicts(log=logging.getLogger())
 
-    def values():
-        while True:
-            try:
-                yield next(value_iterator)
-            except StopIteration:
-                break
-            except ValueError as e:
-                print(e)
-
-    for value in values():
+    for value in value_iterator:
         vs = common.ValueSet(
             id=value["ID"],
             language=data["Variety"][value["Language_ID"]],
