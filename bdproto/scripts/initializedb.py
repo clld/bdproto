@@ -10,6 +10,7 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
 
+import sqlalchemy
 
 import bdproto
 from bdproto import models
@@ -50,6 +51,7 @@ def main(args):
 
     for lang in cldf_dataset["LanguageTable"]:
         if not lang["ID"]:
+            logging.warning(f"Language row without ID: {str(lang)}")
             continue
         data.add(
             models.Variety,
@@ -59,11 +61,32 @@ def main(args):
             macroarea=lang["Macroarea"],
             latitude=lang["Latitude"],
             longitude=lang["Longitude"],
-            family_id=lang["family_id"],
-            parent_id=lang["parent_id"],
             level=lang["level"],
             description=lang["description"],
         )
+
+    # add family and parent relationships to languages
+    for lang in cldf_dataset["LanguageTable"]:
+        if not lang["ID"]:
+            continue
+
+        if lang["parent_id"] and lang["parent_id"] != "NA":
+            try:
+                data["Variety"][lang["ID"]].parent = data["Variety"][lang["parent_id"]]
+            except KeyError:
+                logging.warning(
+                    f"parent {lang['parent_id']} of {lang['ID']} not in LanguageTable"
+                )
+
+        if lang["family_id"] and lang["family_id"] != "NA":
+            try:
+                data["Variety"][lang["ID"]].family = data["Variety"][lang["family_id"]]
+            except KeyError:
+                logging.warning(
+                    f"family {lang['family_id']} of {lang['ID']} not in LanguageTable"
+                )
+
+    DBSession.flush()
 
     for contrib in cldf_dataset["ContributionTable"]:
         data.add(
@@ -72,7 +95,7 @@ def main(args):
             pk=contrib["ID"],
             id=contrib["ID"],
             name=":".join([contrib["Glottocode"], contrib["ID"]]),
-            language_pk=contrib["Glottocode"],
+            language=data["Variety"].get(contrib["Glottocode"]),
             inventory_type=contrib["InventoryType"],
             source=contrib["Source"],
             bibtex=contrib["BibtexKey"],
