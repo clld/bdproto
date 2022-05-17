@@ -10,8 +10,6 @@ from clld.db.meta import DBSession
 from clld.db.models import common
 from clld.lib import bibtex
 
-import sqlalchemy
-
 import bdproto
 from bdproto import models
 
