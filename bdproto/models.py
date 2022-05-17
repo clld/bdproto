@@ -25,11 +25,11 @@ from clld.db.models import common
 @implementer(interfaces.IContribution)
 class Inventory(CustomModelMixin, common.Contribution):
     pk = Column(Integer, ForeignKey("contribution.pk"), primary_key=True)
-    language_pk = Column(Integer, ForeignKey("language.id"))
+    language_pk = Column(String(32), ForeignKey("language.id"))
     language = relationship(common.Language, backref=backref("inventories"))
     inventory_type = Column(String(32))
-    source = Column(String(32))
-    bibtex = Column(String(32))
+    source = Column(String(256))
+    bibtex = Column(String(256))
     comments = Column(String(1024))
 
 
