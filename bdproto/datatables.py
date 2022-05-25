@@ -80,46 +80,62 @@ class Varieties(datatables.language.Languages):
 
 class Phonemes(datatables.value.Values):
     def col_defs(self):
-        return [
-            LinkCol(self, "parameter", get_obj=lambda i: i.valueset.parameter),
-            Col(
-                self,
-                "description",
-                get_obj=lambda i: i.valueset.parameter,
-                model_col=common.Parameter.description,
-            ),
-        ]
+        if self.contribution:
+            return [
+                LinkCol(self, "parameter", get_obj=lambda i: i.valueset.parameter),
+                Col(
+                    self,
+                    "description",
+                    get_obj=lambda i: i.valueset.parameter,
+                    model_col=common.Parameter.description,
+                ),
+            ]
 
+        elif self.parameter:
+            return [
+                LinkCol(
+                    self,
+                    "contribution",
+                    get_obj=lambda i: i.valueset.contribution,
+                    model_col=common.Contribution.name,
+                ),
+                LinkCol(
+                    self,
+                    "language",
+                    model_col=common.Language.name,
+                    get_obj=lambda i: i.valueset.language,
+                ),
+                Col(
+                    self,
+                    "type",
+                    model_col=models.Inventory.inventory_type,
+                    get_obj=lambda i: i.valueset.contribution,
+                    choices=get_distinct_values(models.Inventory.inventory_type),
+                ),
+                Col(
+                    self,
+                    "source",
+                    get_obj=lambda i: i.valueset.contribution,
+                ),
+                Col(
+                    self,
+                    "bibtex key",
+                    get_obj=lambda i: i.valueset.contribution,
+                    model_col=models.Inventory.bibtex,
+                ),
+            ]
 
-class SegmentDetails(datatables.value.Values):
-    def col_defs(self):
-        return [
-            Col(
-                self,
-                "contribution",
-                get_obj=lambda i: i.valueset.contribution,
-                model_col=common.Contribution.name,
-            ),
-            LinkCol(
-                self,
-                "language",
-                model_col=common.Language.name,
-                get_obj=lambda i: i.valueset.language,
-            ),
-        ]
+        return super().col_defs()
 
     def base_query(self, query):
-        query = (
-            query
-            .join(common.ValueSet.contribution)
-            .options(
-                joinedload(common.Value.valueset).joinedload(common.Valueset.language),
+        query = super().base_query(query)
+        if self.parameter:
+            query = query.join(common.ValueSet.contribution).options(
+                joinedload(common.Value.valueset).joinedload(common.ValueSet.language),
                 joinedload(common.Value.valueset).joinedload(
-                    common.Valueset.contribution
+                    common.ValueSet.contribution
                 ),
             )
-        )
-        print(query)
         return query
 
 
@@ -128,4 +144,3 @@ def includeme(config):
     config.register_datatable("contributions", Inventories)
     config.register_datatable("languages", Varieties)
     config.register_datatable("values", Phonemes)
-    config.register_datatable("segments", SegmentDetails)
