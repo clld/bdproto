@@ -139,8 +139,18 @@ class Phonemes(datatables.value.Values):
         return query
 
 
+class Parameters(datatables.parameter.Parameters):
+    def col_defs(self):
+        return [
+            LinkCol(self, "name"),
+            Col(self, "Occurences", model_col=models.Segment.in_inventories),
+            Col(self, "description"),
+        ]
+
+
 def includeme(config):
     """register custom datatables"""
     config.register_datatable("contributions", Inventories)
     config.register_datatable("languages", Varieties)
     config.register_datatable("values", Phonemes)
+    config.register_datatable("parameters", Parameters)

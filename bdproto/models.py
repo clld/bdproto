@@ -1,11 +1,12 @@
 from zope.interface import implementer
 from sqlalchemy import (
+    Boolean,
     Column,
+    Float,
+    ForeignKey,
+    Integer,
     String,
     Unicode,
-    Integer,
-    Boolean,
-    ForeignKey,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship, backref
@@ -42,3 +43,9 @@ class Variety(CustomModelMixin, common.Language):
     parent = relationship("Variety", foreign_keys=[parent_id], remote_side=[id])
     level = Column(String(32))
     macroarea = Column(String(64))
+
+
+@implementer(interfaces.IParameter)
+class Segment(CustomModelMixin, common.Parameter):
+    id = Column(String(128), ForeignKey("parameter.id"), primary_key=True)
+    in_inventories = Column(Integer)

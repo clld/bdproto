@@ -102,7 +102,7 @@ def main(args):
 
     for parameter in cldf_dataset["ParameterTable"]:
         data.add(
-            common.Parameter,
+            models.Segment,
             parameter["ID"],
             id=parameter["ID"],
             name=parameter["Name"],
@@ -115,7 +115,7 @@ def main(args):
         vs = common.ValueSet(
             id=value["ID"],
             language=data["Variety"][value["Language_ID"]],
-            parameter=data["Parameter"][value["Parameter_ID"]],
+            parameter=data["Segment"][value["Parameter_ID"]],
             contribution=data["Inventory"][value["Inventory_ID"]],
         )
         DBSession.add(common.Value(id=value["ID"], name=value["Value"], valueset=vs))
@@ -126,3 +126,6 @@ def prime_cache(args):
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
     """
+    q = DBSession.query(models.Segment).join(common.ValueSet).distinct()
+    for segment in q:
+        segment.in_inventories = len(segment.valuesets)
