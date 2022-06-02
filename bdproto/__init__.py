@@ -27,10 +27,6 @@ def main(global_config, **settings):
             "dataset",
             functools.partial(menu_item, "dataset", label="Home"),
         ),
-        # (
-        #     "values",
-        #     functools.partial(menu_item, "values", label="Values"),
-        # ),
         (
             "languages",
             functools.partial(menu_item, "languages", label="Languages"),
