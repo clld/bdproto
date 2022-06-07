@@ -1,6 +1,7 @@
 import logging
 
 from pathlib import Path
+from sqlalchemy.orm import joinedload
 
 from pycldf import StructureDataset
 from clldutils.misc import nfilter
@@ -131,3 +132,6 @@ def prime_cache(args):
     for segment in q:
         segment.in_inventories = len(segment.valuesets)
         segment.total_inventories = total_inventories
+
+    for variety in DBSession.query(models.Variety).options(joinedload(models.Variety.inventories)):
+        variety.inventories_count = len(variety.inventories)

@@ -60,6 +60,13 @@ class Varieties(datatables.language.Languages):
     def col_defs(self):
         return [
             LinkCol(self, "name"),
+            Col(
+                self,
+                "#",
+                sDescription="Number of inventories",
+                bSearchable=False,
+                model_col=models.Variety.inventories_count,
+            ),
             LinkCol(
                 self, "family", model_col=self.family.name, get_obj=lambda i: i.family
             ),

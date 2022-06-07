@@ -5,7 +5,9 @@ from sqlalchemy import (
     Integer,
     String,
 )
-from sqlalchemy.orm import relationship, backref
+
+from sqlalchemy import func, select
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -22,8 +24,8 @@ from clld.db.models import common
 @implementer(interfaces.IContribution)
 class Inventory(CustomModelMixin, common.Contribution):
     pk = Column(Integer, ForeignKey("contribution.pk"), primary_key=True)
-    language_pk = Column(String(32), ForeignKey("language.id"))
-    language = relationship(common.Language, backref=backref("inventories"))
+    language_pk = Column(String(32), ForeignKey("variety.id"))
+    language = relationship("Variety", back_populates="inventories")
     inventory_type = Column(String(32))
     source = Column(String(256))
     bibtex = Column(String(256))
@@ -39,6 +41,8 @@ class Variety(CustomModelMixin, common.Language):
     parent = relationship("Variety", foreign_keys=[parent_id], remote_side=[id])
     level = Column(String(32))
     macroarea = Column(String(64))
+    inventories = relationship("Inventory", back_populates="language")
+    inventories_count = Column(Integer())
 
 
 @implementer(interfaces.IParameter)
