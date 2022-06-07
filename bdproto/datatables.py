@@ -1,6 +1,6 @@
 from sqlalchemy.orm import joinedload, aliased
 from clld.web import datatables
-from clld.web.datatables.base import LinkCol, Col, LinkToMapCol
+from clld.web.datatables.base import LinkCol, Col, LinkToMapCol, filter_number
 from clld.db.models import common
 from clld.db.util import get_distinct_values, icontains
 
@@ -139,13 +139,32 @@ class Phonemes(datatables.value.Values):
         return query
 
 
+class InvReprCol(Col):
+    __kw__ = {"sClass": "right"}
+
+    def order(self):
+        return models.Segment.in_inventories
+
+    def format(self, item):
+        segment = self.get_obj(item)
+        return f"{segment.in_inventories} ({segment.inv_representation * 100:.1f}%)"
+
+    def search(self, qs):
+        return filter_number(models.Segment.in_inventories, qs)
+
+
 class Parameters(datatables.parameter.Parameters):
     def col_defs(self):
         return [
             LinkCol(self, "name"),
-            Col(self, "Occurences", model_col=models.Segment.in_inventories),
+            InvReprCol(self, "#inventories"),
             Col(self, "description"),
         ]
+
+    def get_options(self):
+        opts = super().get_options()
+        opts["aaSorting"] = [[1, "desc"]]
+        return opts
 
 
 def includeme(config):

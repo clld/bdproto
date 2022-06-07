@@ -126,6 +126,8 @@ def prime_cache(args):
     This procedure should be separate from the db initialization, because
     it will have to be run periodically whenever data has been updated.
     """
-    q = DBSession.query(models.Segment).join(common.ValueSet).distinct()
+    total_inventories = DBSession.query(models.Inventory).count()
+    q = DBSession.query(models.Segment).outerjoin(common.ValueSet).distinct()
     for segment in q:
         segment.in_inventories = len(segment.valuesets)
+        segment.total_inventories = total_inventories

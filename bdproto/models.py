@@ -1,13 +1,9 @@
 from zope.interface import implementer
 from sqlalchemy import (
-    Boolean,
     Column,
-    Float,
     ForeignKey,
     Integer,
     String,
-    Unicode,
-    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declared_attr
@@ -48,4 +44,9 @@ class Variety(CustomModelMixin, common.Language):
 @implementer(interfaces.IParameter)
 class Segment(CustomModelMixin, common.Parameter):
     id = Column(String(128), ForeignKey("parameter.id"), primary_key=True)
-    in_inventories = Column(Integer)
+    in_inventories = Column(Integer, default=0)
+    total_inventories = Column(Integer)
+
+    @hybrid_property
+    def inv_representation(self):
+        return self.in_inventories / self.total_inventories
