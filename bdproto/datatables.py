@@ -33,13 +33,17 @@ class Inventories(datatables.contribution.Contributions):
             LanguageCol(self, "language"),
             Col(
                 self,
+                "#",
+                model_col=models.Inventory.phonemes_count,
+            ),
+            Col(
+                self,
                 "type",
                 model_col=models.Inventory.inventory_type,
                 choices=get_distinct_values(models.Inventory.inventory_type),
             ),
             Col(self, "source", model_col=models.Inventory.source),
             Col(self, "bibtex key", model_col=models.Inventory.bibtex),
-            Col(self, "comments", model_col=models.Inventory.comments),
         ]
 
 
@@ -79,9 +83,13 @@ class Varieties(datatables.language.Languages):
                 model_col=models.Variety.level,
                 choices=get_distinct_values(models.Variety.level),
             ),
-            Col(self, "macroarea", model_col=models.Variety.macroarea),
+            Col(
+                self,
+                "macroarea",
+                model_col=models.Variety.macroarea,
+                choices=get_distinct_values(models.Variety.macroarea),
+            ),
             LinkToMapCol(self, "m"),
-            Col(self, "description", model_col=models.Variety.description),
         ]
 
 

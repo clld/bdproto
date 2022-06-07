@@ -135,3 +135,6 @@ def prime_cache(args):
 
     for variety in DBSession.query(models.Variety).options(joinedload(models.Variety.inventories)):
         variety.inventories_count = len(variety.inventories)
+
+    for inventory in DBSession.query(models.Inventory).options(joinedload(models.Inventory.valuesets)):
+        inventory.phonemes_count = len(inventory.valuesets)

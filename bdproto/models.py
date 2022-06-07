@@ -30,6 +30,7 @@ class Inventory(CustomModelMixin, common.Contribution):
     source = Column(String(256))
     bibtex = Column(String(256))
     comments = Column(String(1024))
+    phonemes_count = Column(Integer())
 
 
 @implementer(interfaces.ILanguage)
