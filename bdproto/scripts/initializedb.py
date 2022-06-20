@@ -48,6 +48,12 @@ def main(args):
 
     cldf_dataset = StructureDataset.from_metadata(cldf_dataset_path)
 
+    for source in bibtex.Database.from_file(cldf_dataset.bibpath):
+        source_obj = bibtex2source(source)
+        data.add(common.Source, source_obj.id, _obj=source_obj)
+
+    DBSession.flush()
+
     for lang in cldf_dataset["LanguageTable"]:
         if not lang["ID"]:
             logging.warning(f"Language row without ID: {str(lang)}")
@@ -88,7 +94,7 @@ def main(args):
     DBSession.flush()
 
     for contrib in cldf_dataset["ContributionTable"]:
-        data.add(
+        o = data.add(
             models.Inventory,
             contrib["ID"],
             pk=contrib["ID"],
@@ -100,6 +106,12 @@ def main(args):
             bibtex=contrib["BibtexKey"],
             comments=contrib["Comments"] if contrib["Comments"] != "NA" else "",
         )
+        if o.bibtex in data["Source"]:
+            DBSession.add(
+                common.ContributionReference(
+                    source=data["Source"][o.bibtex], contribution=o
+                )
+            )
 
     for parameter in cldf_dataset["ParameterTable"]:
         data.add(
@@ -133,8 +145,12 @@ def prime_cache(args):
         segment.in_inventories = len(segment.valuesets)
         segment.total_inventories = total_inventories
 
-    for variety in DBSession.query(models.Variety).options(joinedload(models.Variety.inventories)):
+    for variety in DBSession.query(models.Variety).options(
+        joinedload(models.Variety.inventories)
+    ):
         variety.inventories_count = len(variety.inventories)
 
-    for inventory in DBSession.query(models.Inventory).options(joinedload(models.Inventory.valuesets)):
+    for inventory in DBSession.query(models.Inventory).options(
+        joinedload(models.Inventory.valuesets)
+    ):
         inventory.phonemes_count = len(inventory.valuesets)

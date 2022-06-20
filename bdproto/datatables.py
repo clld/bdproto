@@ -1,6 +1,7 @@
 from sqlalchemy.orm import joinedload, aliased
 from clld.web import datatables
 from clld.web.datatables.base import LinkCol, Col, LinkToMapCol, filter_number
+from clld.web.datatables.contribution import CitationCol
 from clld.db.models import common
 from clld.db.util import get_distinct_values, icontains
 
@@ -18,12 +19,33 @@ class LanguageCol(LinkCol):
         return icontains(common.Language.name, qs)
 
 
+class RefCol(Col):
+    def get_obj(self, item):
+        refs = item.references
+        if refs:
+            return refs[0].source
+        else:
+            return None
+
+    def format(self, item):
+        source = self.get_obj(item)
+        if source:
+            return f"{source.author} ({source.year})"
+        else:
+            return "NA"
+
+
 class Inventories(datatables.contribution.Contributions):
     def base_query(self, query):
         q = (
             query.join(common.Language)
             .distinct()
-            .options(joinedload(models.Inventory.language))
+            .options(
+                joinedload(models.Inventory.language),
+                joinedload(common.Contribution.references).joinedload(
+                    common.ContributionReference.source
+                ),
+            )
         )
         return q
 
@@ -44,6 +66,8 @@ class Inventories(datatables.contribution.Contributions):
             ),
             Col(self, "source", model_col=models.Inventory.source),
             Col(self, "bibtex key", model_col=models.Inventory.bibtex),
+            RefCol(self, "ref"),
+            CitationCol(self, "cite"),
         ]
 
 

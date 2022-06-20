@@ -39,6 +39,10 @@ def main(global_config, **settings):
             "parameters",
             functools.partial(menu_item, "parameters", label="Phonemes"),
         ),
+        (
+            "sources",
+            functools.partial(menu_item, "sources", label="Sources")
+        ),
     )
 
     return config.make_wsgi_app()
