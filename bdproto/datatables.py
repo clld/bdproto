@@ -4,6 +4,7 @@ from clld.web.datatables.base import LinkCol, Col, LinkToMapCol, filter_number
 from clld.web.datatables.contribution import CitationCol
 from clld.db.models import common
 from clld.db.util import get_distinct_values, icontains
+from clld.lib.bibtex import Record
 
 from bdproto import models
 
@@ -30,7 +31,7 @@ class RefCol(Col):
     def format(self, item):
         source = self.get_obj(item)
         if source:
-            return f"{source.author} ({source.year})"
+            return Record.from_object(source).text()
         else:
             return "NA"
 
