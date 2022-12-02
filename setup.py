@@ -19,8 +19,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        "clld>=9.2.1",
-        "clldmpg",
+        "clld>=9.2.2",
+        "clldmpg>=4.3",
         "psycopg2",
     ],
     extras_require={
